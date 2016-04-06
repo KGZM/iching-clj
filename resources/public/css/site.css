@@ -1,0 +1,80 @@
+body {
+    background-color: rgb(39,40,45);
+    color: white;
+}
+header.mdl-layout__header {
+    background-color: rgb(233,46,60);
+}
+.hexagram-container {
+    margin: 0px;
+}
+.hexagram {
+    margin: 0px auto;
+    display: block;
+    max-width: 200px;
+    /* Figure out size thing: */
+    height: 120px; 
+}
+.hexagram .line {
+    stroke: white;
+}
+
+.hexagram .line-old {
+    stroke: rgb(233,46,60)
+}
+.entry {
+    /* font-family: 'Montserrat', sans-serif; */
+    font-family: 'Open Sans', sans-serif; 
+}
+.entry-top {
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#565c67+0,15191f+100 */
+    background: rgb(86,92,103); /* Old browsers */
+    background: -moz-radial-gradient(center, ellipse cover, rgba(86,92,103,1) 0%, rgba(21,25,31,1) 100%); /* FF3.6-15 */
+    background: -webkit-radial-gradient(center, ellipse cover, rgba(86,92,103,1) 0%,rgba(21,25,31,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: radial-gradient(ellipse at center, rgba(86,92,103,1) 0%,rgba(21,25,31,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+
+    padding-top: 17.5px;
+    padding-bottom: 17.5px;
+}
+
+.entry-text-title {
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 10px;
+}
+.entry-text {
+    font-size: 18px;
+    padding: 35px;
+    font-weight: 300;
+}
+.divider {
+    height: 1px;
+    background-color: rgb(39, 40, 45);
+    margin-top: 17.5px;
+    margin-bottom: 17.5px;
+}
+.mdl-cell {
+    background-color: black;
+}
+
+.hexagram-names {
+    padding-bottom: 17.5px;
+}
+.hexagram-name {
+    line-height: 30px;
+    text-align: center;
+}
+
+.hexagram-name-chinese {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.hexagram-name-english {
+    font-size: 26px;
+    font-weight: 300;
+}
+
+.changing {
+    color: rgb(233,46,60);
+}
