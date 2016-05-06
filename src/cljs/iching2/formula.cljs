@@ -24,7 +24,7 @@
 
 (defn formula->changed-formula [formula]
   (let [changed (map change-table formula)]
-    (when (not= changed formula) changed)))
+    (not-empty (when (not= changed formula) changed))))
 
 (defn formula->trigrams [formula]
   (partition 3 (formula->binary formula)))
