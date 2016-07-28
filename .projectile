@@ -1,2 +1,3 @@
--/target/*
--/out/*
+.git
+target
+.cljs_node_repl

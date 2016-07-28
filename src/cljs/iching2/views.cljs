@@ -7,6 +7,7 @@
             [iching2.consult :as consult]
             [iching2.formula :as formula]))
 
+
 (declare mdl-component pprint linebreaks entry-component roll-view layout-frame)
 
 (defn mdl-component [component]

@@ -9,8 +9,8 @@
                  [com.cemerick/piggieback   "0.2.1"      :scope "test"]
                  [org.clojure/tools.nrepl   "0.2.12"     :scope "test"]
                  [weasel                    "0.7.0"      :scope "test"]
-                 [deraen/boot-sass  "0.2.1" :scope "test"]
-                 [org.slf4j/slf4j-nop  "1.7.13" :scope "test"]
+                 [deraen/boot-sass          "0.2.1"      :scope "test"]
+                 [org.slf4j/slf4j-nop       "1.7.13"     :scope "test"]
 
                  ;; Front-end
                  [org.clojure/clojurescript "1.8.40"]
@@ -34,7 +34,7 @@
         (sass)))
 
 (deftask run []
-  (comp (serve :dir "resources/public"
+  (comp (serve :dir "resources"
                :port 3500)
         (watch)
         (cljs-repl)
@@ -43,7 +43,7 @@
 
 (deftask production []
   (task-options! cljs {:optimizations :advanced}
-                 sass {:output-style  :compressed})
+                 sass {:output-style :compressed})
   identity)
 
 (deftask development []
@@ -56,3 +56,9 @@
   []
   (comp (development)
         (run)))
+
+(deftask release []
+  (comp (production)
+        (build)
+        (sift :include #{#"\.out" #"\.cljs\.edn$"} :invert true)
+        (target)))

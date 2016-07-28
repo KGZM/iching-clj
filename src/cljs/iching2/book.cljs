@@ -53,12 +53,13 @@
          (assoc data :binary->hexagram-id))))
 
 (defn ingest-book [state-atom data]
-  (swap! state-atom assoc :loaded true)
-  (reset! book (-> (js->clj data :keywordize-keys true)
-                   (id-trigram-index)
-                   (id-hexagram-index)
-                   (binary-trigram-index)
-                   (binary-hexagram-index))))
+  (when-not (:loaded @state-atom)
+    (swap! state-atom assoc :loaded true)
+    (reset! book (-> (js->clj data :keywordize-keys true)
+                     (id-trigram-index)
+                     (id-hexagram-index)
+                     (binary-trigram-index)
+                     (binary-hexagram-index)))))
 
 (defn fetch-book [state-atom]
   (xhr/send "/data/iching.json"
