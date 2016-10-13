@@ -29,8 +29,7 @@
  '[deraen.boot-sass      :refer [sass]])
 
 (deftask build []
-  (comp (speak)
-        (cljs)
+  (comp (cljs)
         (sass)))
 
 (deftask run []
