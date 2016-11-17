@@ -138,28 +138,51 @@
      [:div.hexagram-name.hexagram-name-chinese chinese]
      [:div.hexagram-name.hexagram-name-english english]]))
 
+(defn entry-section [& children]
+  (into [:div] children))
+
+(defn entry-text
+  ([text] (entry-text {} text))
+  ([attrs text]
+   (into [:p attrs] text)))
+
+(defn entry-text-title
+  ([title] (entry-text-title {} title))
+  ([attrs title]
+   [:div.entry-text-title attrs title]))
+
+(defn the-image [entry]
+  [entry-section
+   [entry-text-title "The Image"]
+   [entry-text (-> entry :image linebreaks)]])
+
+(defn the-judgement [entry]
+  [entry-section
+   [entry-text-title "The Judgement"]
+   [entry-text (-> entry :judgement linebreaks)]])
+
+(defn changing-lines [entry roll]
+  [entry-section
+   [entry-text-title {:class ["changing"]} "Changing Lines"]
+   [entry-text {:class "entry-changing-lines changing"}
+    (->> roll
+         formula/formula->changing-lines
+         (mapv (comp linebreaks #(str (get-in entry [:lines % :description]) "\n"))))]])
+
 (defn entry-component [state roll]
   (fn [state roll]
     (let [entry (book/hexagram-from-formula roll)]
-        [:div.entry
-         [:div.entry-top
-          [format-name (:name entry)]
-          [svg/hexagram roll]]
-         (into [:div.entry-text
-                [:div.entry-text-title "The Image"]
-                (into [:p] (-> entry :image linebreaks))
-                [:div.divider]
-                [:div.entry-text-title "The Judgement"]
-                (into [:p] (-> entry :judgement linebreaks))]
-               (if (formula/formula->changed-formula roll)
-                 [[:div.divider]
-                  [:div.entry-text-title.changing "Changing Lines"]
-                  (->> roll
-                       formula/formula->changing-lines
-                       (mapv (comp linebreaks #(str (get-in entry [:lines % :description]) "\n")))
-                       (into [:p.entry-changing-lines.changing]))]))])))
-
-
+      [:div.entry
+       [:div.entry-top
+        [format-name (:name entry)]
+        [svg/hexagram roll]]
+       [:div.entry-text
+        (->> [[the-image entry]
+              [the-judgement entry]
+              (when (formula/formula->changed-formula roll)
+                [changing-lines entry roll])]
+             (filter some?)
+             (interpose [:div.divider]))]])))
 
 (defn roll-view [state]
   [:div "Get your roll on."
