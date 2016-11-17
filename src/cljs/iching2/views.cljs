@@ -5,7 +5,11 @@
             [iching2.svg :as svg]
             [iching2.book :as book]
             [iching2.consult :as consult]
-            [iching2.formula :as formula]))
+            [iching2.formula :as formula]
+
+            [material-ui.core :as ui]
+            [material-ui.icons :as ui.icons]
+            ))
 
 
 (declare mdl-component pprint linebreaks entry-component roll-view layout-frame)
@@ -54,11 +58,13 @@
       [:div.roll-dialog
        [:div {:on-click #(close-dialog state)}
         "Close this shit mang."]
-       [text-field {:on-key-press
-                    #(when (= (-> % .-key) "Enter")
-                       (close-dialog state)
-                       (swap! state assoc-in [:roll] (consult/roll-full)))}
-        "Pose Your Question" question]])))
+       [ui/TextField {:hint-text    "Pose Your Question"
+                      :on-change    #(reset! question (-> %1 .-target .-value))
+                      :on-key-press #(when (= (-> % .-key) "Enter")
+                                       (close-dialog state)
+                                       (swap! state assoc-in [:roll] (consult/roll-full)))
+                      }]
+       ])))
 
 (defn do-roll [state]
   (open-dialog state roll-dialog))
@@ -67,20 +73,21 @@
   (mdl-component
    (fn [state & contents]
      (fn [state & contents]
-       [:div {:class "mdl-layout mdl-js-layout mdl-layout--fixed-header"}
-        [dialog state]
-        [:header {:class  "mdl-layout__header mdl-layout__header--scroll"}
-         [:div {:class "mdl-layout__header-row"}
-          [:span {:class "mdl-layout-title"} "I Ching"]
-          [:div {:class "mdl-layout-spacer"}]
-          [:nav {:class "mdl-navigation"}
-           [:img.dice-btn {:src "/images/dice-btn.svg" :on-click #(do-roll state)}]]]]
-        #_[:div {:class "mdl-layout__drawer"}
-         [:span {:class "mdl-layout-title"} "I Ching"]
-         [:nav {:class "mdl-navigation"}
-          [:a {:class "mdl-navigation__link" :href ""} "About"]]]
-        (into  [:main {:class "mdl-layout__content main-content"}]
-               contents)]))))
+       [ui/MuiThemeProvider {:mui-theme (ui/getMuiTheme ui/darkBaseTheme)}
+        [:div {:class "mdl-layout mdl-js-layout mdl-layout--fixed-header"}
+         [dialog state]
+         [:header {:class  "mdl-layout__header mdl-layout__header--scroll"}
+          [:div {:class "mdl-layout__header-row"}
+           [:span {:class "mdl-layout-title"} "I Ching"]
+           [:div {:class "mdl-layout-spacer"}]
+           [:nav {:class "mdl-navigation"}
+            [:img.dice-btn {:src "/images/dice-btn.svg" :on-click #(do-roll state)}]]]]
+         #_[:div {:class "mdl-layout__drawer"}
+            [:span {:class "mdl-layout-title"} "I Ching"]
+            [:nav {:class "mdl-navigation"}
+             [:a {:class "mdl-navigation__link" :href ""} "About"]]]
+         (into  [:main {:class "mdl-layout__content main-content"}]
+                contents)]]))))
 
 (defn grid [& contents]
   (fn [& contents]
@@ -149,7 +156,7 @@
                   [:div.entry-text-title.changing "Changing Lines"]
                   (->> roll
                        formula/formula->changing-lines
-                       (map (comp linebreaks #(str (get-in entry [:lines % :description]) "\n")))
+                       (mapv (comp linebreaks #(str (get-in entry [:lines % :description]) "\n")))
                        (into [:p.entry-changing-lines.changing]))]))])))
 
 

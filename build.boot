@@ -1,5 +1,5 @@
 (set-env!
- :source-paths #{"sass" "src/cljs"}
+ :source-paths #{"sass" "src/cljs" "src/clj"}
  :resource-paths #{"resources"}
  :dependencies '[
                  [adzerk/boot-cljs          "1.7.228-1"  :scope "test"]
@@ -14,12 +14,16 @@
 
                  ;; Front-end
                  [org.clojure/clojurescript "1.8.40"]
-                 [reagent "0.5.1" :exclusions [org.clojure/tools.reader]]
+                 [reagent "0.6.0" :exclusions [org.clojure/tools.reader cljsjs/react-dom]]
                  [reagent-forms "0.5.22"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.1.7" :exclusions [org.clojure/tools.reader]]
-                 [cljsjs/material "1.1.3-1"]])
+                 [cljsjs/material "1.1.3-1"]
+                 
+                 ;;New frontend
+                 [cljsjs/material-ui "0.15.4-0"]
+                 ])
 
 (require
  '[adzerk.boot-cljs      :refer [cljs]]
