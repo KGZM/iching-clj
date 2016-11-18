@@ -39,35 +39,62 @@
   (swap! state assoc-in [:roll-dialog :open] false))
 
 (defn roll-dialog [state]
-  (let [question (reagent/cursor state [:question])
-        close-fn #(close-roll-dialog state)
-        actions  (map reagent/as-element
-                      [[ui/FlatButton {:label        "Cancel"
-                                       :primary      true
-                                       :on-touch-tap close-fn}]
-                       [ui/FlatButton {:label        "Roll"
-                                       :primary      true
-                                       :on-touch-tap #(swap! state assoc-in [:roll] (consult/roll-full))}]])
+  (let [question   (reagent/atom "")
+        close-fn   #(close-roll-dialog state)
+        confirm-fn #(do (swap! state assoc-in [:roll] (consult/roll-full))
+                        (swap! state assoc-in [:question] @question)
+                        (close-fn))
+        actions    (map reagent/as-element
+                        [[ui/FlatButton {:label        "Cancel"
+                                         :secondary    true
+                                         :on-touch-tap close-fn}]
+                         [ui/RaisedButton {:label        "Roll"
+                                           :primary      true
+                                           :on-touch-tap confirm-fn}]])
         ]
     (fn [state]
-      [ui/Dialog {:open             (or (-> @state :roll-dialog :open) false)
+      [ui/Dialog {:title            "Consult The I Ching"
+                  :open             (or (-> @state :roll-dialog :open) false)
                   :actions          actions
                   :on-request-close close-fn}
        [:p "What do you want to ask the oracle about?"]
        [ui/TextField {:hint-text    "Life, The Universe, And Everything"
                       :on-change    #(reset! question (-> %1 .-target .-value))
                       :on-key-press #(when (= (-> % .-key) "Enter")
-                                       (close-fn)
-                                       (swap! state assoc-in [:roll] (consult/roll-full)))}]])))
+                                       (confirm-fn))}]])))
 
 ;;; Layout
+(defn rgb [r g b]
+  (str "rgb(" (apply str (interpose "," [r g b])) ")"))
+
+(defn rgba [r g b a]
+  (str "rgba(" (apply str (interpose "," [r g b a])) ")"))
+
+(defn gray [l]
+  (rgb l l l))
+
+(def white (rgb 255 255 255))
+
+(def theme
+  (-> {:palette   {:primary1Color      (rgb 233 46 60)
+                   :primary2Color      (rgb 233 46 60)
+                   :primary3Color      (rgb 233 46 60)
+                   :accent1Color       (rgb 233 46 60)
+                   :accent2Color       (rgb 233 46 60)
+                   :accent3Color       (rgb 233 46 60)
+                   :canvasColor        (rgb 39 40 45)
+                   :textColor          white
+                   :alternateTextColor white}
+       :textField {:hintColor (gray 150)}
+       :dialog    {:bodyColor white}}
+      clj->js
+      ui/getMuiTheme))
 
 (defn layout-frame [state & contents]
   (fn [state & contents]
-    [ui/MuiThemeProvider {:mui-theme (ui/getMuiTheme ui/darkBaseTheme)}
+    [ui/MuiThemeProvider {:mui-theme theme}
      [:div
       [ui/AppBar {:title "I Ching"}]
-      [:img.dice-btn {:src "/images/dice-btn.svg" :on-click #(open-roll-dialog state)}]
       (into [:main]
              contents)]]))
 
@@ -119,21 +146,22 @@
       [:div.entry
        [:div.entry-top
         [format-name (:name entry)]
-        [svg/hexagram (key-all-with identity roll)]]
+        [svg/hexagram roll]]
        (into [:div.entry-text]
              (->> [[the-image entry]
                    [the-judgement entry]
                    (when (formula/formula->changed-formula roll)
                      [changing-lines entry roll])]
+                  (filter some?)
                   (interpose [:div.divider])
-                  (filter some?)))])))
+                  (key-all-with identity)))])))
 
 (defn result [state roll]
   (fn [state roll]
     (let [roll-1 roll
           roll-2 (formula/formula->changed-formula roll)]
       [:div.result 
-       [:div (:question @state)]
+       [:div.question (:question @state)]
        (when roll-1 [entry-component roll-1])
        (when roll-2 [entry-component roll-2])])))
 
@@ -146,7 +174,12 @@
        (if (:loaded @state)
          [:div
           [roll-dialog state]
-          [result state roll]]
+          [result state roll]
+          [ui/FloatingActionButton
+           {:class-name   "main-fab"
+            :children     (reagent/as-element [:img.dice-btn {:src "/images/dice-btn.svg"}])
+            :on-touch-tap #(open-roll-dialog state)}]
+          ]
          [:div [:h2 "Loading...."]])])))
 
 (defn home-page-1 [state]
