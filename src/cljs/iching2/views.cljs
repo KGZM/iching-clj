@@ -40,9 +40,11 @@
 
 (defn roll-dialog [state]
   (let [question   (reagent/atom "")
-        close-fn   #(close-roll-dialog state)
-        confirm-fn #(do (swap! state assoc-in [:roll] (consult/roll-full))
-                        (swap! state assoc-in [:question] @question)
+        close-fn   #(do (reset! question "")
+                        (close-roll-dialog state))
+        confirm-fn #(do (swap! state merge
+                               {:question @question
+                                :roll     (consult/roll-full)})
                         (close-fn))
         actions    (map reagent/as-element
                         [[ui/FlatButton {:label        "Cancel"
@@ -50,8 +52,7 @@
                                          :on-touch-tap close-fn}]
                          [ui/RaisedButton {:label        "Roll"
                                            :primary      true
-                                           :on-touch-tap confirm-fn}]])
-        ]
+                                           :on-touch-tap confirm-fn}]])]
     (fn [state]
       [ui/Dialog {:title            "Consult The I Ching"
                   :open             (or (-> @state :roll-dialog :open) false)
@@ -61,9 +62,11 @@
        [ui/TextField {:hint-text    "Life, The Universe, And Everything"
                       :on-change    #(reset! question (-> %1 .-target .-value))
                       :on-key-press #(when (= (-> % .-key) "Enter")
-                                       (confirm-fn))}]])))
+                                       (confirm-fn))
+                      :full-width   true}]])))
 
 ;;; Layout
+
 (defn rgb [r g b]
   (str "rgb(" (apply str (interpose "," [r g b])) ")"))
 
@@ -160,7 +163,7 @@
   (fn [state roll]
     (let [roll-1 roll
           roll-2 (formula/formula->changed-formula roll)]
-      [:div.result 
+      [:div.result
        [:div.question (:question @state)]
        (when roll-1 [entry-component roll-1])
        (when roll-2 [entry-component roll-2])])))
@@ -178,8 +181,7 @@
           [ui/FloatingActionButton
            {:class-name   "main-fab"
             :children     (reagent/as-element [:img.dice-btn {:src "/images/dice-btn.svg"}])
-            :on-touch-tap #(open-roll-dialog state)}]
-          ]
+            :on-touch-tap #(open-roll-dialog state)}]]
          [:div [:h2 "Loading...."]])])))
 
 (defn home-page-1 [state]
