@@ -15,7 +15,7 @@
                  ;; Front-end
                  [org.clojure/clojurescript "1.8.40"]
                  [reagent "0.6.0" :exclusions [org.clojure/tools.reader cljsjs/react]]
-                 [reagent-forms "0.5.22"]
+                 ;; [reagent-forms "0.5.22"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.1.7" :exclusions [org.clojure/tools.reader]]
