@@ -48,7 +48,8 @@
                                  {:question @question
                                   :roll     (consult/roll-full)})
                         (nav/goto (routes/roll-path {:roll         (apply str (consult/roll-full))
-                                                     :query-params {"question" @question}}))
+                                                     :query-params {"date"     (.getTime (new js/Date))
+                                                                    "question" @question}}))
                         (close-fn))
         actions    (map reagent/as-element
                         [[ui/FlatButton {:label        "Cancel"
@@ -187,7 +188,7 @@
 
 (defn home-page [state]
   (fn [state]
-    (let [roll (-> @state :navigation :roll extract-roll)]
+    (let [roll (-> @state :navigation :roll extract-roll not-empty)]
       [layout-frame state
        (if (:loaded @state)
          [:div
