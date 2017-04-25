@@ -18,7 +18,7 @@
                  ;; [reagent-forms "0.5.22"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
-                 [venantius/accountant "0.1.7" :exclusions [org.clojure/tools.reader]]
+                 [kibu/pushy "0.3.7"]
                  
                  ;;New frontend
                  [cljsjs/material-ui "0.15.4-0"]

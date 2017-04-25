@@ -6,6 +6,8 @@
             [iching2.book :as book]
             [iching2.consult :as consult]
             [iching2.formula :as formula]
+            [iching2.routes :as routes]
+            [iching2.navigation :as nav]
             [material-ui.core :as ui]
             [material-ui.icons :as ui.icons]))
 
@@ -42,9 +44,11 @@
   (let [question   (reagent/atom "")
         close-fn   #(do (reset! question "")
                         (close-roll-dialog state))
-        confirm-fn #(do (swap! state merge
-                               {:question @question
-                                :roll     (consult/roll-full)})
+        confirm-fn #(do #_(swap! state merge
+                                 {:question @question
+                                  :roll     (consult/roll-full)})
+                        (nav/goto (routes/roll-path {:roll         (apply str (consult/roll-full))
+                                                     :query-params {"question" @question}}))
                         (close-fn))
         actions    (map reagent/as-element
                         [[ui/FlatButton {:label        "Cancel"
@@ -54,16 +58,22 @@
                                            :primary      true
                                            :on-touch-tap confirm-fn}]])]
     (fn [state]
-      [ui/Dialog {:title            "Consult The I Ching"
+      [ui/Dialog {;:title            "Consult The I Ching"
                   :open             (or (-> @state :roll-dialog :open) false)
                   :actions          actions
                   :on-request-close close-fn}
-       [:p "What do you want to ask the oracle about?"]
-       [ui/TextField {:hint-text    "Life, The Universe, And Everything"
-                      :on-change    #(reset! question (-> %1 .-target .-value))
-                      :on-key-press #(when (= (-> % .-key) "Enter")
-                                       (confirm-fn))
-                      :full-width   true}]])))
+       [ui/Tabs
+        [ui/Tab {:label "Simulated Dice"}
+         [:br]
+         [:p "What do you want to ask the oracle about?"]
+         [ui/TextField {:hint-text    "Life, The Universe, And Everything"
+                        :on-change    #(reset! question (-> %1 .-target .-value))
+                        :on-key-press #(when (= (-> % .-key) "Enter")
+                                         (confirm-fn))
+                        :full-width   true}]]
+        [ui/Tab {:label "Manual"
+                 }]
+        ]])))
 
 ;;; Layout
 
@@ -88,6 +98,7 @@
                    :canvasColor        (rgb 39 40 45)
                    :textColor          white
                    :alternateTextColor white}
+       :inkBar    {:backgroundColor white}
        :textField {:hintColor (gray 150)}
        :dialog    {:bodyColor white}}
       clj->js
@@ -99,7 +110,7 @@
      [:div
       [ui/AppBar {:title "I Ching"}]
       (into [:main]
-             contents)]]))
+            contents)]]))
 
 ;;; Elements
 
@@ -162,17 +173,21 @@
 (defn result [state roll]
   (fn [state roll]
     (let [roll-1 roll
-          roll-2 (formula/formula->changed-formula roll)]
-      [:div.result
-       [:div.question (:question @state)]
-       (when roll-1 [entry-component roll-1])
-       (when roll-2 [entry-component roll-2])])))
+          roll-2 (formula/formula->changed-formula roll)
+          question (-> @state :navigation :question)]
+      [:div
+       (when-not (empty? question)
+         [:div.result [:div.question [:p "Your topic: " [:strong question]]]])
+       [:div.result
+        (when roll-1 [entry-component roll-1])
+        (when roll-2 [entry-component roll-2])]])))
 
 ;;; Pages
+(def extract-roll (partial map long))
 
 (defn home-page [state]
   (fn [state]
-    (let [roll (:roll @state)]
+    (let [roll (-> @state :navigation :roll extract-roll)]
       [layout-frame state
        (if (:loaded @state)
          [:div
